@@ -10,12 +10,14 @@ import com.portfoliofollower.repository.portfolio.exchange.ExchangeRepository
 import com.portfolioprocessor.model.ExchangeAsset
 import com.portfolioprocessor.model.ExchangePortfolio
 import com.portfolioprocessor.model.PortfolioAsset
+import io.github.cdimascio.dotenv.Dotenv
 import kotlinx.coroutines.CoroutineScope
 import java.util.*
 
 class BinanceRepository(
     private val scope: CoroutineScope,
-    private val restClient: BinanceApiRestClient
+    private val restClient: BinanceApiRestClient,
+    private val excludedCoins: List<String>
 ): ExchangeRepository {
 
     val exchangeInfo = restClient.exchangeInfo
@@ -70,7 +72,7 @@ class BinanceRepository(
     }
 
     override fun getAllSymbols(): List<TickerPrice> {
-        return restClient.allPrices
+        return restClient.allPrices.filter { asset -> excludedCoins.none { asset.symbol.contains(it)} }
     }
 
 

@@ -1,9 +1,9 @@
 package com.portfoliofollower.di
 
 import com.binance.api.client.BinanceApiClientFactory
-import com.binance.api.client.config.BinanceApiConfig
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-
+import com.google.gson.reflect.TypeToken
 import com.portfoliofollower.SHRIMPY_BASE_URL
 import com.portfoliofollower.api.ShrimpyApi
 import com.portfoliofollower.repository.portfolio.exchange.binance.BinanceRepository
@@ -20,7 +20,7 @@ import org.koin.dsl.module
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.ObjectInputFilter.Config
+import java.lang.reflect.Type
 import java.util.concurrent.TimeUnit
 
 
@@ -44,7 +44,14 @@ private val serviceModule = module{
 
 private val repositoryModule = module {
     factory { ShrimpyRepository(get()) }
-    factory { BinanceRepository(get(),get()) }
+    factory {
+        val dotEnv: Dotenv = get()
+        val gson: Gson = get()
+        val excludedCoins: List<String> = runCatching {
+            val listOfTestObject: Type = object : TypeToken<List<List<String>?>?>() {}.type
+            gson.fromJson<List<String>>(dotEnv.get("EXCLUDED_ASSETS"), listOfTestObject)
+        }.getOrNull() ?: listOf()
+        BinanceRepository(get(), get(),excludedCoins) }
 }
 
 private val netModule = module {
