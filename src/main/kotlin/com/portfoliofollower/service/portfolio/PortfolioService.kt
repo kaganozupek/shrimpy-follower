@@ -12,6 +12,7 @@ abstract class PortfolioService(
     var lastFetchedPortfolio: Portfolio? = null
     var portfolioChangeListener: OnPortfolioChangedListener? = null
     var job: Job? = null
+    var logCounter = 0
 
     abstract suspend fun getPortfolio(): Portfolio
 
@@ -41,7 +42,11 @@ abstract class PortfolioService(
 
         }
 
-        println("PORTFOLIO FETCHED $portfolio")
+        if(logCounter % 20 == 0) {
+            println("PORTFOLIO FETCHED $portfolio")
+            logCounter = 0
+        }
+        logCounter++
         lastFetchedPortfolio = portfolio
     }.onFailure {
         it.printStackTrace()
