@@ -2,12 +2,14 @@ package com.portfoliofollower.service.abstract
 
 import com.portfoliofollower.PORTFOLIO_SCAN_TRESHOLD
 import com.portfoliofollower.model.AutomatorInfo
+import com.portfoliofollower.service.notification.TelegramNotificationService
 import com.portfolioprocessor.model.Portfolio
 import kotlinx.coroutines.*
 
 abstract class PortfolioService(
     protected val scope: CoroutineScope,
-    protected val portfolioTemplate: AutomatorInfo
+    protected val portfolioTemplate: AutomatorInfo,
+    protected val notificationService: TelegramNotificationService
 ) {
     var lastFetchedPortfolio: Portfolio? = null
     var portfolioChangeListener: OnPortfolioChangedListener? = null
@@ -46,6 +48,9 @@ abstract class PortfolioService(
             println("PORTFOLIO FETCHED $portfolio")
             logCounter = 0
         }
+
+        notificationService.lastPortfolio = portfolio
+
         logCounter++
         lastFetchedPortfolio = portfolio
     }.onFailure {

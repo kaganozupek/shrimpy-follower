@@ -42,7 +42,7 @@ internal class BinanceRepositoryTest : KoinComponent {
         AutomatorInfo(SHRIMPY_LIXIVA_LEADER_ID, SHRIMPY_LIXIVA_PORTFOLIO_ID, AutomatorType.SHRIMPY_BINANCE)
     private val automator by lazy {
         ShrimpyBinanceAutomator(
-            template, scope
+            template, scope, get()
         )
     }
 

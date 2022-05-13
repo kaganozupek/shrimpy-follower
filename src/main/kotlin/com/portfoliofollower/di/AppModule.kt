@@ -8,6 +8,7 @@ import com.portfoliofollower.SHRIMPY_BASE_URL
 import com.portfoliofollower.api.ShrimpyApi
 import com.portfoliofollower.repository.portfolio.exchange.binance.BinanceRepository
 import com.portfoliofollower.repository.portfolio.shrimpy.ShrimpyRepository
+import com.portfoliofollower.service.notification.TelegramNotificationService
 import io.github.cdimascio.dotenv.Dotenv
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,15 @@ private val coroutineScopeModule = module {
 }
 
 private val serviceModule = module{
+
+    single {
+        val dotEenv: Dotenv = get()
+        TelegramNotificationService(
+            dotEenv.get("TELEGRAM_BOT_TOKEN") ?: null,
+            dotEenv.get("TELEGRAM_CHAT_ID")?.toLong(),
+            get()
+        )
+    }
 
 }
 
@@ -61,7 +71,9 @@ private val netModule = module {
         okhttpClientBuilder.build()
     }
 
-    single<Converter.Factory> { GsonConverterFactory.create(GsonBuilder().create()) }
+    single { GsonBuilder().setPrettyPrinting().create() }
+
+    single<Converter.Factory> { GsonConverterFactory.create(get()) }
 
     single(named("retrofit_shrimpy")) {
         provideRetrofit(
@@ -87,6 +99,10 @@ private val thirdPartySDKModule = module {
         val dotEnv: Dotenv = get()
         val factory = BinanceApiClientFactory.newInstance(dotEnv.get("BINANCE_API_KEY"), dotEnv.get("BINANCE_API_SECRET"))
         factory.newRestClient()
+    }
+
+    factory {
+
     }
 }
 

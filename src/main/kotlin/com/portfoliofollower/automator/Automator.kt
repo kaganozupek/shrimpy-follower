@@ -5,12 +5,13 @@ import com.portfolioprocessor.model.Portfolio
 import com.portfoliofollower.service.abstract.OnPortfolioChangedListener
 import com.portfoliofollower.service.abstract.PortfolioService
 import com.portfoliofollower.service.exchange.ExchangeService
+import com.portfoliofollower.service.notification.TelegramNotificationService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import java.util.*
 
-abstract class Automator(private val scope: CoroutineScope): OnPortfolioChangedListener {
+abstract class Automator(private val scope: CoroutineScope, private val notificationService: TelegramNotificationService): OnPortfolioChangedListener {
 
     abstract val portfolioService: PortfolioService
     abstract val exchangeService: ExchangeService
@@ -18,6 +19,7 @@ abstract class Automator(private val scope: CoroutineScope): OnPortfolioChangedL
     override suspend fun onPortfolioChanged(templateId: String, portfolio: Portfolio) {
         println("PORTFOLIO CHANGED $portfolio ${Date().toString()}")
         processPortfolioChange(portfolio)
+        notificationService.notifyPortfolioChange(portfolio)
         println("PROCESS PORTFOLIO FINISHED $portfolio ${Date().toString()}")
 
     }
