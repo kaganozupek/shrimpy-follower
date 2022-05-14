@@ -5,6 +5,7 @@ import com.portfoliofollower.model.AutomatorInfo
 import com.portfoliofollower.service.notification.TelegramNotificationService
 import com.portfolioprocessor.model.Portfolio
 import kotlinx.coroutines.*
+import kotlin.math.abs
 
 abstract class PortfolioService(
     protected val scope: CoroutineScope,
@@ -35,8 +36,22 @@ abstract class PortfolioService(
 
     private suspend fun run() = runCatching {
         val portfolio = getPortfolio();
+        processPortfolio(portfolio)
+
+    }.onFailure {
+        it.printStackTrace()
+    }
+
+    suspend fun processPortfolio(portfolio: Portfolio) {
         lastFetchedPortfolio?.let {
             if (portfolio != it) {
+
+                if (portfolio.assets.all { lastFetchedPortfolio!!.assets.any { lp -> lp.code == it.code } } && portfolio.assets.all {
+                        abs(it.percentage - lastFetchedPortfolio!!.assets.first() { p -> it.code == p.code }.percentage) < 5
+                    }) {
+                    return
+                }
+
                 portfolioChangeListener?.onPortfolioChanged(portfolioTemplate.id, portfolio)
             }
         } ?: let {
@@ -44,7 +59,7 @@ abstract class PortfolioService(
 
         }
 
-        if(logCounter % 20 == 0) {
+        if (logCounter % 20 == 0) {
             println("PORTFOLIO FETCHED $portfolio")
             logCounter = 0
         }
@@ -53,8 +68,6 @@ abstract class PortfolioService(
 
         logCounter++
         lastFetchedPortfolio = portfolio
-    }.onFailure {
-        it.printStackTrace()
     }
 }
 

@@ -12,7 +12,9 @@ import com.portfoliofollower.automator.Automator
 import com.portfoliofollower.automator.ShrimpyBinanceAutomator
 import com.portfoliofollower.model.AutomatorInfo
 import com.portfoliofollower.model.AutomatorType
+import com.portfoliofollower.repository.portfolio.shrimpy.ShrimpyRepository
 import com.portfoliofollower.service.exchange.binance.BinanceExchangeService
+import com.portfoliofollower.service.portfolio.shrimpy.ShrimpyPortfolioService
 import com.portfoliofollower.setupKoin
 import com.portfolioprocessor.model.ExchangeAsset
 import com.portfolioprocessor.model.Portfolio
@@ -38,6 +40,12 @@ internal class BinanceRepositoryTest : KoinComponent {
         )
     }
 
+    private val shrimpyRepository: ShrimpyRepository by inject()
+
+    private val shrimpyPortfolioService: ShrimpyPortfolioService by lazy {
+        ShrimpyPortfolioService(scope, template, shrimpyRepository, get())
+    }
+
     private val template =
         AutomatorInfo(SHRIMPY_LIXIVA_LEADER_ID, SHRIMPY_LIXIVA_PORTFOLIO_ID, AutomatorType.SHRIMPY_BINANCE)
     private val automator by lazy {
@@ -47,7 +55,7 @@ internal class BinanceRepositoryTest : KoinComponent {
     }
 
     val repository by lazy {
-        BinanceRepository(get(), restClient)
+        BinanceRepository(get(), restClient, listOf())
     }
 
     @Before
@@ -82,17 +90,37 @@ internal class BinanceRepositoryTest : KoinComponent {
         automator.onPortfolioChanged(
             template.id, Portfolio(
                 listOf(
-                        PortfolioAsset(
-                            "BTC", 33
-                        ),
-                        PortfolioAsset(
-                            "BNB", 33
-                        ),
-                        PortfolioAsset(
-                            "LUNA", 33
-                        ),
-                    )
+                    PortfolioAsset(
+                        "BTC", 33
+                    ),
+                    PortfolioAsset(
+                        "BNB", 33
+                    ),
+                    PortfolioAsset(
+                        "LUNA", 33
+                    ),
+                )
             )
         )
     }
+
+    @Test
+    fun `portfolio service test`() = runBlocking {
+        shrimpyPortfolioService.lastFetchedPortfolio = Portfolio(
+            listOf(
+                PortfolioAsset("LUNA", 33),
+                PortfolioAsset("USDT", 66)
+            )
+        )
+
+        shrimpyPortfolioService.processPortfolio(
+            Portfolio(
+                listOf(
+                    PortfolioAsset("LUNA", 33),
+                    PortfolioAsset("BTC", 66)
+                )
+            )
+        )
+    }
+
 }
