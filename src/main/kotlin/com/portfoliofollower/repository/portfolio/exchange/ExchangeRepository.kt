@@ -10,4 +10,6 @@ interface ExchangeRepository {
     suspend fun convertToUsdt(symbol: String, amount: Double, allSymbols: List<TickerPrice>)
     suspend fun buy(symbol: String, amount: Double, allSymbols: List<TickerPrice>)
     fun getAllSymbols(): List<TickerPrice>
+    suspend fun buyWithPair(pair: String, amount: Double, allSymbols: List<TickerPrice>)
+    suspend fun convertToBusd(symbol: String, amount: Double, allSymbols: List<TickerPrice>)
 }

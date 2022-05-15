@@ -17,7 +17,13 @@ abstract class ExchangeService(
         getPortfolio().assets.mapConcurrently {
             runCatching {
                 //'^([0-9]{1,20})(\.[0-9]{1,20})?$'
-                convertToUsdt(it, it.amount, allSymbols)
+                if(it.code.contains("LUNA")) {
+                    convertToBusd(it,it.amount, allSymbols)
+                    val busd = getPortfolio().assets.first { it.code.contains("BUSD")}
+                    convertToUsdt(busd,busd.amount, allSymbols)
+                } else {
+                    convertToUsdt(it, it.amount, allSymbols)
+                }
             }.onFailure {
                 it.printStackTrace()
             }
@@ -36,8 +42,16 @@ abstract class ExchangeService(
         repository.convertToUsdt(asset.code, amount, allSymbols)
     }
 
+    private suspend fun convertToBusd(asset: ExchangeAsset, amount: Double, allSymbols: List<TickerPrice>) {
+        repository.convertToBusd(asset.code, amount, allSymbols)
+    }
+
     suspend fun buySymbol(symbol: String, usdtAmount: Double, allSymbols: List<TickerPrice>) {
         repository.buy(symbol,usdtAmount, allSymbols)
+    }
+
+    suspend fun buyPair(symbol: String, usdtAmount: Double, allSymbols: List<TickerPrice>) {
+        repository.buyWithPair(symbol,usdtAmount, allSymbols)
     }
 
     fun getAllPrices(): List<TickerPrice> {

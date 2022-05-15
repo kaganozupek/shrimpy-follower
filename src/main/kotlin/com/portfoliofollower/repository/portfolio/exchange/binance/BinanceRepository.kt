@@ -48,8 +48,23 @@ class BinanceRepository(
         }
     }
 
+
+    override suspend fun convertToBusd(symbol: String, amount: Double, allSymbols: List<TickerPrice>) {
+        val symbol = allSymbols.firstOrNull { listOf("${symbol.uppercase()}BUSD", "BUSD${symbol.uppercase()}").contains(it.symbol) }
+        symbol?.let {
+            restClient.newOrder(NewOrder(it.symbol,OrderSide.SELL,OrderType.MARKET,null,calculateAmount(it.symbol,amount)))
+        }
+    }
+
     override suspend fun buy(symnbol: String, amount: Double, allSymbols: List<TickerPrice>) {
         val symbol = allSymbols.firstOrNull { listOf("${symnbol.uppercase()}USDT", "USDT${symnbol.uppercase()}").contains(it.symbol) }
+        symbol?.let {
+            restClient.newOrder(NewOrder(it.symbol,OrderSide.BUY, OrderType.MARKET, null, calculateBuyAmount(it,amount)))
+        }
+    }
+
+    override suspend fun buyWithPair(pair: String, amount: Double, allSymbols: List<TickerPrice>) {
+        val symbol = allSymbols.firstOrNull { it.symbol == pair }
         symbol?.let {
             restClient.newOrder(NewOrder(it.symbol,OrderSide.BUY, OrderType.MARKET, null, calculateBuyAmount(it,amount)))
         }

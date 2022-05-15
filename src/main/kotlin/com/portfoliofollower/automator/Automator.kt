@@ -29,7 +29,13 @@ abstract class Automator(private val scope: CoroutineScope, private val notifica
         val usdt = exchangeService.getPortfolio().assets.firstOrNull() { it.code == "USDT" } ?: return
         val allSymbols = exchangeService.getAllPrices()
         portfolio.assets.mapConcurrently {
-            buySymbol(it.code, usdt.amount * it.percentage.toDouble() / 100, allSymbols)
+            if(it.code.uppercase() == "LUNA") {
+                buySymbol("BUSD", usdt.amount * it.percentage.toDouble() / 100, allSymbols)
+                buyPair("LUNABUSD", usdt.amount * 0.97f * it.percentage.toDouble() / 100, allSymbols)
+            } else {
+                buySymbol(it.code, usdt.amount * it.percentage.toDouble() / 100, allSymbols)
+
+            }
         }
 
     }
@@ -49,6 +55,14 @@ abstract class Automator(private val scope: CoroutineScope, private val notifica
        }.onFailure {
            it.printStackTrace()
        }
+    }
+
+    suspend fun buyPair(symbol: String, usdt: Double, allSymbols: List<TickerPrice>) {
+        runCatching {
+            exchangeService.buyPair(symbol, usdt, allSymbols)
+        }.onFailure {
+            it.printStackTrace()
+        }
     }
 }
 
