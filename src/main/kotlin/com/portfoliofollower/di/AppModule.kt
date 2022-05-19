@@ -7,7 +7,8 @@ import com.google.gson.reflect.TypeToken
 import com.portfoliofollower.SHRIMPY_BASE_URL
 import com.portfoliofollower.api.ShrimpyApi
 import com.portfoliofollower.repository.portfolio.exchange.binance.BinanceRepository
-import com.portfoliofollower.repository.portfolio.shrimpy.ShrimpyRepository
+import com.portfoliofollower.repository.portfolio.portfolio.shrimpy.ShrimpyRepository
+import com.portfoliofollower.service.notification.DiscordNotificationService
 import com.portfoliofollower.service.notification.TelegramNotificationService
 import io.github.cdimascio.dotenv.Dotenv
 import kotlinx.coroutines.CoroutineScope
@@ -109,7 +110,26 @@ private val thirdPartySDKModule = module {
     }
 
     factory {
+        val dotEnv: Dotenv = get()
+        val factory = BinanceApiClientFactory.newInstance(dotEnv.get("BINANCE_API_KEY"), dotEnv.get("BINANCE_API_SECRET"))
+        factory.newWebSocketClient()
+    }
 
+    factory(named("LeaderBinanceClient")) {
+        val dotEnv: Dotenv = get()
+        val factory = BinanceApiClientFactory.newInstance(dotEnv.get("LIXIVIA_BINANCE_API_KEY"), dotEnv.get("LIXIVIA_BINANCE_API_SECRET"))
+        factory.newRestClient()
+    }
+
+    factory(named("LeaderBinanceClientSocket")) {
+        val dotEnv: Dotenv = get()
+        val factory = BinanceApiClientFactory.newInstance(dotEnv.get("LIXIVIA_BINANCE_API_KEY"), dotEnv.get("LIXIVIA_BINANCE_API_SECRET"))
+        factory.newWebSocketClient()
+    }
+
+    factory {
+        val dotEnv: Dotenv = get()
+        DiscordNotificationService(dotEnv.get("DISCORD_BOT_TOKEN"), dotEnv.get("DISCORD_CHANNEL_ID"), get(),get())
     }
 }
 

@@ -1,7 +1,7 @@
-package com.portfoliofollower.repository.portfolio.shrimpy
+package com.portfoliofollower.repository.portfolio.portfolio.shrimpy
 
 import com.portfoliofollower.api.ShrimpyApi
-import com.portfoliofollower.repository.portfolio.PortfolioRepository
+import com.portfoliofollower.repository.portfolio.portfolio.PortfolioRepository
 import com.portfolioprocessor.model.Portfolio
 import com.portfolioprocessor.model.toPortfolio
 

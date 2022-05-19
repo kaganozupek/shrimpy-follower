@@ -10,7 +10,13 @@ data class PortfolioAsset(
 data class Portfolio(
     val assets: List<PortfolioAsset>
 
-)
+) {
+    fun toMessage(): String {
+        return assets.joinToString("\n") {
+            "${it.code} -> %${it.percentage}"
+        }
+    }
+}
 
 fun ShrimpyProfileDTO.toPortfolio(): Portfolio {
     return Portfolio(this.assets.filter {

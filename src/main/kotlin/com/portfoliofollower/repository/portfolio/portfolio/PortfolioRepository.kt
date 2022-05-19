@@ -1,4 +1,4 @@
-package com.portfoliofollower.repository.portfolio
+package com.portfoliofollower.repository.portfolio.portfolio
 
 import com.portfolioprocessor.model.Portfolio
 

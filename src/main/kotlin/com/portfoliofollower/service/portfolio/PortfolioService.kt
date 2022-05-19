@@ -14,27 +14,20 @@ abstract class PortfolioService(
 ) {
     var lastFetchedPortfolio: Portfolio? = null
     var portfolioChangeListener: OnPortfolioChangedListener? = null
-    var job: Job? = null
     var logCounter = 0
 
-    abstract suspend fun getPortfolio(): Portfolio
-
-    fun startObservation() {
-        job = scope.launch {
-            while (true) {
-                run()
-                delay(PORTFOLIO_SCAN_TRESHOLD)
+    init {
+        notificationService.rebalance = {
+            scope.launch {
+                runForce()
             }
         }
     }
 
-    fun stopObservation() {
-        scope.launch {
-            job?.cancelAndJoin()
-        }
-    }
+    abstract suspend fun getPortfolio(): Portfolio
 
-    private suspend fun run() = runCatching {
+    abstract fun startObservation()
+    protected suspend fun run() = runCatching {
         val portfolio = getPortfolio();
         processPortfolio(portfolio)
 
@@ -42,7 +35,23 @@ abstract class PortfolioService(
         it.printStackTrace()
     }
 
-    suspend fun processPortfolio(portfolio: Portfolio) {
+
+    protected suspend fun runForce() = runCatching {
+        val portfolio = getPortfolio();
+        processPortfolio(portfolio, true)
+
+    }.onFailure {
+        it.printStackTrace()
+    }
+
+    suspend fun processPortfolio(portfolio: Portfolio, force: Boolean = false) {
+
+        if(force) {
+            notificationService.sendMessage("INFO","REBALANCING")
+            portfolioChangeListener?.onPortfolioChanged(portfolioTemplate.id, portfolio,force)
+            return
+        }
+
         lastFetchedPortfolio?.let {
             if (portfolio != it) {
 
@@ -55,14 +64,15 @@ abstract class PortfolioService(
                 portfolioChangeListener?.onPortfolioChanged(portfolioTemplate.id, portfolio)
             }
         } ?: let {
-            portfolioChangeListener?.onPortfolioChanged(portfolioTemplate.id, portfolio)
+
 
         }
 
         if (logCounter % 20 == 0) {
-            println("PORTFOLIO FETCHED $portfolio")
+
             logCounter = 0
         }
+        println("PORTFOLIO FETCHED $portfolio")
 
         notificationService.lastPortfolio = portfolio
 
@@ -72,5 +82,5 @@ abstract class PortfolioService(
 }
 
 interface OnPortfolioChangedListener {
-    suspend fun onPortfolioChanged(templateId: String, portfolio: Portfolio)
+    suspend fun onPortfolioChanged(templateId: String, portfolio: Portfolio, silent: Boolean = false)
 }

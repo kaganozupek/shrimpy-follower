@@ -13,5 +13,6 @@ data class AutomatorInfo(
 enum class AutomatorType(
     type: Int
 ) {
-    SHRIMPY_BINANCE(0)
+    SHRIMPY_BINANCE(0),
+    BINANCE_BINANCE(1)
 }

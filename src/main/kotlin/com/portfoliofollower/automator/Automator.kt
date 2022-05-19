@@ -5,22 +5,27 @@ import com.portfolioprocessor.model.Portfolio
 import com.portfoliofollower.service.abstract.OnPortfolioChangedListener
 import com.portfoliofollower.service.abstract.PortfolioService
 import com.portfoliofollower.service.exchange.ExchangeService
+import com.portfoliofollower.service.notification.DiscordNotificationService
 import com.portfoliofollower.service.notification.TelegramNotificationService
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import java.util.*
 
-abstract class Automator(private val scope: CoroutineScope, private val notificationService: TelegramNotificationService): OnPortfolioChangedListener {
+abstract class Automator(private val scope: CoroutineScope, private val notificationService: TelegramNotificationService, private val discordNotificationService: DiscordNotificationService): OnPortfolioChangedListener {
 
     abstract val portfolioService: PortfolioService
     abstract val exchangeService: ExchangeService
 
-    override suspend fun onPortfolioChanged(templateId: String, portfolio: Portfolio) {
-        println("PORTFOLIO CHANGED $portfolio ${Date().toString()}")
+
+    override suspend fun onPortfolioChanged(templateId: String, portfolio: Portfolio, silent: Boolean) {
+        println("LEADER PORTFOLIO CHANGED $portfolio ${Date()}")
         processPortfolioChange(portfolio)
         notificationService.notifyPortfolioChange(portfolio)
-        println("PROCESS PORTFOLIO FINISHED $portfolio ${Date().toString()}")
+        if(!silent) {
+            discordNotificationService.notifyPortfolioChange(portfolio)
+        }
+        println("PROCESS PORTFOLIO FINISHED $portfolio ${Date()}")
 
     }
 
