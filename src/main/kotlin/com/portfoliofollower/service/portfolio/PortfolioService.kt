@@ -29,6 +29,7 @@ abstract class PortfolioService(
     abstract fun startObservation()
     protected suspend fun run() = runCatching {
         val portfolio = getPortfolio();
+        notificationService.sendMessage("INFO", "PROCESSING PORTFOLIO")
         processPortfolio(portfolio)
 
     }.onFailure {

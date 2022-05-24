@@ -10,9 +10,7 @@ import com.portfoliofollower.service.abstract.PortfolioService
 import com.portfoliofollower.service.notification.DiscordNotificationService
 import com.portfoliofollower.service.notification.TelegramNotificationService
 import com.portfolioprocessor.model.Portfolio
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import okhttp3.internal.closeQuietly
 import java.io.Closeable
 
@@ -37,9 +35,10 @@ class BinancePortfolioService(
     override fun startObservation() {
         startSocketListen()
         scope.launch {
-            runForce()
+            //runForce()
         }
     }
+    var jobRun: Job? = null
 
     private fun startSocketListen() {
         notificationService.sendMessage("INFO","Socket Initializing")
@@ -47,8 +46,14 @@ class BinancePortfolioService(
         socket?.closeQuietly()
         socket = socketClient.onUserDataUpdateEvent(listenKey, object: BinanceApiCallback<UserDataUpdateEvent> {
             override fun onResponse(response: UserDataUpdateEvent?) {
-                scope.launch {
-                    run()
+                if(response?.eventType != UserDataUpdateEvent.UserDataUpdateEventType.ORDER_TRADE_UPDATE) {
+                    runCatching {
+                        jobRun?.cancel()
+                    }
+                    jobRun = scope.launch {
+                        delay(500)
+                        run()
+                    }
                 }
                 notifyDiscordChannel(response)
                 notifyTelegram(response)
