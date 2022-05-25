@@ -64,9 +64,6 @@ class BinancePortfolioService(
                 notificationService.sendMessage("ERROR","Socket Error")
                 notificationService.sendMessage("ERROR", "${cause?.toString()}")
                 notificationService.sendMessage("ERROR","${cause?.message}")
-                scope.launch {
-                    restartSocket()
-                }
             }
         })
     }
