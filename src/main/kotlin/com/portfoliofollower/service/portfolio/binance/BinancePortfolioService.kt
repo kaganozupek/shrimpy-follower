@@ -36,17 +36,24 @@ class BinancePortfolioService(
         startSocketListen()
         scope.launch {
          //   runForce()
+
         }
     }
     var jobRun: Job? = null
 
+    var initializing = false
     private fun startSocketListen() {
+        if(initializing) {
+            return
+        }
+        initializing = true
         notificationService.sendMessage("INFO","Socket Initializing")
         val listenKey = restClient.startUserDataStream()
 
         runCatching {
             socket?.closeQuietly()
         }
+
         socket = socketClient.onUserDataUpdateEvent(listenKey, object: BinanceApiCallback<UserDataUpdateEvent> {
             override fun onResponse(response: UserDataUpdateEvent?) {
                 if(response?.eventType != UserDataUpdateEvent.UserDataUpdateEventType.ORDER_TRADE_UPDATE) {
@@ -71,7 +78,18 @@ class BinancePortfolioService(
 
             }
 
+            override fun onClosing(code: Int?, reason: String?) {
+                //notificationService.sendMessage("SOCKET CLOSING", "${code}, $reason")
+            }
+
+            override fun onClosed(code: Int?, reason: String?) {
+                notificationService.sendMessage("SOCKET CLOSED", "${code}, $reason")
+                startSocketListen()
+            }
+
         })
+
+        initializing = false
     }
 
     private fun notifyTelegram(response: UserDataUpdateEvent?) {

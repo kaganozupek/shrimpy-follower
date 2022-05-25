@@ -34,7 +34,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
 
     //Binance
-    implementation 'com.github.investidordesucesso:program-java-clientapi-spot-binance:master-SNAPSHOT'
+    implementation 'com.github.kaganozupek:program-java-clientapi-spot-binance:master-SNAPSHOT'
 
     //Dotenv
     implementation 'io.github.cdimascio:dotenv-kotlin:6.2.2'
