@@ -68,7 +68,7 @@ class MainInstance: KoinComponent {
                 scope,
                 notificationService,
                 BinancePortfolioService(scope,this,notificationService,get(named("LeaderBinanceClient")),get(named("LeaderBinanceClientSocket")),get()),
-                BinanceExchangeService(scope,get()),
+                BinanceExchangeService(scope,get(), notificationService),
                 get()
             )
         }

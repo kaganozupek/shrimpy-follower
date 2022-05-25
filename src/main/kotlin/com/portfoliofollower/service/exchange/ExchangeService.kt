@@ -3,13 +3,15 @@ package com.portfoliofollower.service.exchange
 import com.binance.api.client.domain.market.TickerPrice
 import com.portfoliofollower.automator.mapConcurrently
 import com.portfoliofollower.repository.portfolio.exchange.ExchangeRepository
+import com.portfoliofollower.service.notification.TelegramNotificationService
 import com.portfolioprocessor.model.ExchangeAsset
 import com.portfolioprocessor.model.ExchangePortfolio
 import com.portfolioprocessor.model.PortfolioAsset
 import kotlinx.coroutines.CoroutineScope
 abstract class ExchangeService(
     private val scope: CoroutineScope,
-    private val repository: ExchangeRepository
+    private val repository: ExchangeRepository,
+    private val notificationService: TelegramNotificationService
 ) {
 
     suspend fun resetPortfolioToUSDT() {
@@ -24,8 +26,12 @@ abstract class ExchangeService(
                 } else {
                     convertToUsdt(it, it.amount, allSymbols)
                 }
-            }.onFailure {
-                it.printStackTrace()
+
+                notificationService.sendMessage("INFO", "PORTFOLIO RESET\n\n ${getPortfolio()}")
+
+            }.onFailure { error ->
+                notificationService.sendMessage("ERROR","RESET PORTFOLIO USDT\n\n${it}\n\n${error.message}")
+                error.printStackTrace()
             }
         }
     }

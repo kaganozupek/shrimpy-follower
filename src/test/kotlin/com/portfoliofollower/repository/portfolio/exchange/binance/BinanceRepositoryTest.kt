@@ -18,6 +18,7 @@ import com.portfoliofollower.model.AutomatorType
 import com.portfoliofollower.repository.portfolio.portfolio.shrimpy.ShrimpyRepository
 import com.portfoliofollower.service.exchange.binance.BinanceExchangeService
 import com.portfoliofollower.service.notification.DiscordNotificationService
+import com.portfoliofollower.service.notification.TelegramNotificationService
 import com.portfoliofollower.service.portfolio.shrimpy.ShrimpyPortfolioService
 import com.portfoliofollower.setupKoin
 import com.portfolioprocessor.model.ExchangeAsset
@@ -46,9 +47,11 @@ internal class BinanceRepositoryTest : KoinComponent {
     private val leaderRestClient: BinanceApiRestClient by inject(named("LeaderBinanceClient"))
     private val leaderSocketClient: BinanceApiWebSocketClient by inject(named("LeaderBinanceClientSocket"))
     private val discordNotificationService: DiscordNotificationService by inject()
+    private val telegramNotificationService: TelegramNotificationService by inject()
+
     private val exchangeService by lazy {
         BinanceExchangeService(
-            scope, repository
+            scope, repository, telegramNotificationService
         )
     }
 

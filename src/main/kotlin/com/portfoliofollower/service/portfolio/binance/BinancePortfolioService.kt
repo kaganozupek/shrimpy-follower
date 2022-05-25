@@ -43,7 +43,10 @@ class BinancePortfolioService(
     private fun startSocketListen() {
         notificationService.sendMessage("INFO","Socket Initializing")
         val listenKey = restClient.startUserDataStream()
-        socket?.closeQuietly()
+
+        runCatching {
+            socket?.closeQuietly()
+        }
         socket = socketClient.onUserDataUpdateEvent(listenKey, object: BinanceApiCallback<UserDataUpdateEvent> {
             override fun onResponse(response: UserDataUpdateEvent?) {
                 if(response?.eventType != UserDataUpdateEvent.UserDataUpdateEventType.ORDER_TRADE_UPDATE) {
@@ -64,7 +67,10 @@ class BinancePortfolioService(
                 notificationService.sendMessage("ERROR","Socket Error")
                 notificationService.sendMessage("ERROR", "${cause?.toString()}")
                 notificationService.sendMessage("ERROR","${cause?.message}")
+                startSocketListen()
+
             }
+
         })
     }
 

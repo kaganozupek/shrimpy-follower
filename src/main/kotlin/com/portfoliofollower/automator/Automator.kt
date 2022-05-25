@@ -43,6 +43,9 @@ abstract class Automator(private val scope: CoroutineScope, private val notifica
             }
         }
 
+        notificationService.sendMessage("PORTFOLIO PROCESS FINISHED", "$portfolio \n\n ${exchangeService.getPortfolio()}")
+
+
     }
 
     fun startAutomation() {
@@ -57,16 +60,21 @@ abstract class Automator(private val scope: CoroutineScope, private val notifica
     suspend fun buySymbol(symbol: String, usdt: Double, allSymbols: List<TickerPrice>) {
        runCatching {
            exchangeService.buySymbol(symbol, usdt, allSymbols)
-       }.onFailure {
-           it.printStackTrace()
+           notificationService.sendMessage("INFO BUY", "${symbol} SUCCESS" )
+
+       }.onFailure {error ->
+           notificationService.sendMessage("ERROR","BUY SYMBOL\n\n${symbol} ${usdt}\n\n${error.message}")
+           error.printStackTrace()
        }
     }
 
     suspend fun buyPair(symbol: String, usdt: Double, allSymbols: List<TickerPrice>) {
         runCatching {
             exchangeService.buyPair(symbol, usdt, allSymbols)
-        }.onFailure {
-            it.printStackTrace()
+            notificationService.sendMessage("INFO BUY", "${symbol} SUCCESS" )
+        }.onFailure { error ->
+            notificationService.sendMessage("ERROR","BUY SYMBOL\n\n${symbol} ${usdt}\n\n${error.message}")
+            error.printStackTrace()
         }
     }
 }

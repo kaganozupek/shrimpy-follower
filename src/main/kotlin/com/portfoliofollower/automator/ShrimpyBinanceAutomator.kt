@@ -26,7 +26,8 @@ class ShrimpyBinanceAutomator(
     override val exchangeService by lazy {
         BinanceExchangeService(
             scope,
-            get()
+            get(),
+            notifier
         )
     }
 }
