@@ -27,13 +27,15 @@ abstract class ExchangeService(
                     convertToUsdt(it, it.amount, allSymbols)
                 }
 
-                notificationService.sendMessage("INFO", "PORTFOLIO RESET\n\n ${getPortfolio()}")
 
             }.onFailure { error ->
                 notificationService.sendMessage("ERROR","RESET PORTFOLIO USDT\n\n${it}\n\n${error.message}")
                 error.printStackTrace()
             }
         }
+
+        notificationService.sendMessage("INFO", "PORTFOLIO RESET\n\n ${getPortfolio()}")
+
     }
 
     suspend fun getPortfolio(): ExchangePortfolio {

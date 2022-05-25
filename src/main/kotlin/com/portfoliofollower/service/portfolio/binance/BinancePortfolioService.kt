@@ -35,7 +35,7 @@ class BinancePortfolioService(
     override fun startObservation() {
         startSocketListen()
         scope.launch {
-            //runForce()
+         //   runForce()
         }
     }
     var jobRun: Job? = null
